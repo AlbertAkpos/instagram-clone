@@ -1,63 +1,65 @@
 package com.example.instagramclone
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
-import androidx.fragment.app.Fragment
-import androidx.multidex.MultiDex
-import com.example.instagramclone.Fragments.HomeFragment
-import com.example.instagramclone.Fragments.NotificationFragment
-import com.example.instagramclone.Fragments.ProfileFragment
-import com.example.instagramclone.Fragments.SearchFragment
-import com.google.android.material.bottomnavigation.BottomNavigationView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.NavController
+import androidx.navigation.Navigation
+import androidx.navigation.ui.NavigationUI
+import androidx.navigation.ui.setupWithNavController
+import com.example.instagramclone.services.CustomEvent
 import kotlinx.android.synthetic.main.activity_main.*
+import org.greenrobot.eventbus.EventBus
+
 
 class MainActivity : AppCompatActivity() {
-     private val navigationSelectedListner = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        when (item.itemId) {
-            R.id.home_icon -> {
-                moveToFragment(HomeFragment())
-                return@OnNavigationItemSelectedListener true
-            }
-
-            R.id.search -> {
-                moveToFragment(SearchFragment())
-                return@OnNavigationItemSelectedListener true
-
-            }
-
-            R.id.add_post -> {
-                return@OnNavigationItemSelectedListener true
-            }
-
-            R.id.notification -> {
-                moveToFragment(NotificationFragment())
-                return@OnNavigationItemSelectedListener true
-            }
-
-            R.id.profile -> {
-                moveToFragment(ProfileFragment())
-                return@OnNavigationItemSelectedListener true
-
-            }
-        }
-
-         false
 
 
-    }
-
-
+    private lateinit var navController: NavController
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        moveToFragment(HomeFragment())
-        bottom_navigation.setOnNavigationItemSelectedListener(navigationSelectedListner)
+        navController = Navigation.findNavController(this, R.id.nav_host_controller)
+
+        bottom_navigation.setupWithNavController(navController)
+
+
     }
 
 
-    private fun moveToFragment(fragment: Fragment){
-        supportFragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit()
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        println("""
+            
+           main activity 
+            
+        """)
+
+
+        if (data != null) {
+            println("""
+                
+               Data is not null 
+                
+            """)
+            EventBus.getDefault().post(CustomEvent(requestCode,
+                resultCode, data))
+        }
+
+
     }
+
+
+
+
+    override fun onSupportNavigateUp(): Boolean {
+        return NavigationUI.navigateUp(navController, null)
+    }
+
+
+
 }

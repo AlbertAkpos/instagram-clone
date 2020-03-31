@@ -39,12 +39,11 @@
 
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/search_recycler_view"
+        android:id="@+id/search_feed_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/notification_app_bar_layout"
-        android:visibility="invisible"
-
+        tools:listitem="@layout/user_item_layout"
         />
 
 </RelativeLayout>

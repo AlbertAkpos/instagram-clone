@@ -7,7 +7,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.instagramclone.Model.User
+import com.bumptech.glide.Glide
+import com.example.instagramclone.model.User
 
 import com.example.instagramclone.R
 import com.example.instagramclone.utillity.Util
@@ -25,7 +26,7 @@ import kotlinx.android.synthetic.main.fragment_profile.view.*
  */
 class ProfileFragment : Fragment() {
 
-    private val userId = FirebaseAuth.getInstance().currentUser?.uid
+    private val userId  = FirebaseAuth.getInstance().currentUser?.uid
     lateinit var user: User
     private val firebaseUser = FirebaseAuth.getInstance().currentUser
 
@@ -34,22 +35,23 @@ class ProfileFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
-
-        Util.getFollowers(view)
-        Util.getFollowing(view)
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         user = User()
-        val bundle = this.arguments
+        val bundle: User? = arguments?.getParcelable("user")
 
         if(bundle != null){
-            user = bundle.getParcelable("user")!!
+            user = bundle
             fullname.text = user.fullname
             profile_bio.text = user.bio
-            checkFollowAndFollowing(user)
+            checkFollowAndFollowing(user, view)
+
+            Util.getFollowers(view, user.uid)
+            Util.getFollowing(view, user.uid)
+            getUserInfo(user.uid)
 
             view.edit_follow_btn.setOnClickListener {
                 if (view.edit_follow_btn.text == "Follow"){
@@ -62,6 +64,9 @@ class ProfileFragment : Fragment() {
 
         } else {
             edit_follow_btn.text = "Edit profile"
+            Util.getFollowers(view, userId.toString())
+            Util.getFollowing(view, userId.toString())
+            getUserInfo(userId.toString())
             view.edit_follow_btn.setOnClickListener {
                 startActivity(Intent(context, AccountSettingsActivity::class.java))
             }
@@ -69,7 +74,7 @@ class ProfileFragment : Fragment() {
     }
 
 
-    private fun checkFollowAndFollowing(user: User) {
+    private fun checkFollowAndFollowing(user: User, view: View) {
         val followRef = firebaseUser?.uid.let { uid ->
             FirebaseDatabase.getInstance().reference
                 .child("Follow").child(uid.toString())
@@ -81,9 +86,9 @@ class ProfileFragment : Fragment() {
 
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     if(dataSnapshot.child(user.uid).exists()) {
-                        edit_follow_btn.text = "Following"
+                        view.edit_follow_btn.text = "Following"
                     } else {
-                        edit_follow_btn.text = "Follow"
+                        view.edit_follow_btn.text = "Follow"
 
                     }
                 }
@@ -91,14 +96,22 @@ class ProfileFragment : Fragment() {
     }
 
 
-    private fun getUserInfo() {
-        val userRef = FirebaseDatabase.getInstance().reference.child("User").child(userId.toString())
+    private fun getUserInfo(userId: String) {
+        val userRef = FirebaseDatabase.getInstance().reference.child("User").child(userId)
         userRef.addValueEventListener(object : ValueEventListener{
             override fun onCancelled(p0: DatabaseError) {}
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()){
                     val user = dataSnapshot.getValue(User::class.java)
+                    Glide.with(context!!).asBitmap()
+                        .load(user?.image)
+                        .error(R.drawable.profile_icon)
+                        .into(profile_image)
+
+                    fullname.text = user?.fullname
+                    profile_bio.text = user?.bio
+
                 }
             }
         })

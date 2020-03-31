@@ -8,20 +8,20 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.instagramclone.Adapter.UserAdapter
-import com.example.instagramclone.Model.User
+import com.example.instagramclone.model.User
 
 import com.example.instagramclone.R
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import kotlinx.android.synthetic.main.fragment_search.*
+import kotlinx.android.synthetic.main.fragment_home.view.*
 import kotlinx.android.synthetic.main.fragment_search.view.*
+import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * A simple [Fragment] subclass.
@@ -40,7 +40,7 @@ class SearchFragment : Fragment() {
         // Inflate the layout for this fragment
         val view =  inflater.inflate(R.layout.fragment_search, container, false)
 
-        recyclerView = view.search_recycler_view
+        recyclerView = view.search_feed_recycler_view
 //        recyclerView?.setHasFixedSize(true)
         recyclerView?.layoutManager = LinearLayoutManager(context)
         usersList = ArrayList()
@@ -55,11 +55,9 @@ class SearchFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                recyclerView?.visibility = View.VISIBLE
-                getUsersFromFirebase()
 
                 //function that do the actual searching
-                searchUser(s.toString().trim())
+                searchUser(s.toString().trim().toLowerCase(Locale.ROOT))
             }
         })
 
@@ -91,9 +89,10 @@ class SearchFragment : Fragment() {
     }
 
     private fun searchUser(text: String) {
+
         val query = FirebaseDatabase.getInstance().reference
             .child("User")
-            .orderByChild("fullname")
+            .orderByChild("lowerCaseName")
             .startAt(text).endAt(text + "\uf8ff")
 
         query.addValueEventListener(object : ValueEventListener {
@@ -104,6 +103,7 @@ class SearchFragment : Fragment() {
 
                 for(snapshot in dataSnapshot.children){
                     val user = snapshot.getValue(User::class.java)
+
                     if(user != null) usersList?.add(user)
                 }
 

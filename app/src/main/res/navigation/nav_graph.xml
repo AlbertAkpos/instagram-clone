@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/home_icon">
+
+    <fragment
+        android:id="@+id/home_icon"
+        android:name="com.example.instagramclone.Fragments.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" />
+    <fragment
+        android:id="@+id/add_post"
+        android:name="com.example.instagramclone.Fragments.AddPostFragment"
+        android:label="AddPostFragment"
+        tools:layout="@layout/fragment_add_post"/>
+    <fragment
+        android:id="@+id/search"
+        android:name="com.example.instagramclone.Fragments.SearchFragment"
+        android:label="fragment_search"
+        tools:layout="@layout/fragment_search" >
+        <action
+            android:id="@+id/action_search_to_profile"
+            app:destination="@id/profile" />
+    </fragment>
+    <fragment
+        android:id="@+id/notification"
+        android:name="com.example.instagramclone.Fragments.NotificationFragment"
+        android:label="fragment_notification"
+        tools:layout="@layout/fragment_notification" />
+    <fragment
+        android:id="@+id/profile"
+        android:name="com.example.instagramclone.Fragments.ProfileFragment"
+        tools:layout="@layout/fragment_profile"
+        android:label="ProfileFragment" >
+        <argument
+            android:name="user"
+            app:argType="com.example.instagramclone.model.User"
+            app:nullable="true" />
+    </fragment>
+</navigation>

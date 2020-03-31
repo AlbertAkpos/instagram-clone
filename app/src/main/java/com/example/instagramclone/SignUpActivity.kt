@@ -11,6 +11,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_sign_up.*
+import java.util.*
+import kotlin.collections.HashMap
 
 
 class SignUpActivity : AppCompatActivity() {
@@ -77,7 +79,7 @@ class SignUpActivity : AppCompatActivity() {
     }
 
 
-    fun saveUserInfo( fullname: String, userName: String, email: String, view: View, progressBar: ProgressBar){
+    private fun saveUserInfo(fullname: String, userName: String, email: String, view: View, progressBar: ProgressBar){
 
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
         val userRef = FirebaseDatabase.getInstance().reference.child("User")
@@ -85,10 +87,16 @@ class SignUpActivity : AppCompatActivity() {
 
         userMap["uid"] = currentUserId!!
         userMap["fullname"] = fullname
+        userMap["lowerCaseName"] = fullname.toLowerCase(Locale.ROOT)
         userMap["username"] = userName
         userMap["email"] = email
         userMap["bio"] = "Hey there, I'm using Jodava"
         userMap["image"] = "gs://instagram-clone-d1306.appspot.com/Default Images/profile.png"
+
+        FirebaseDatabase.getInstance().reference.child("Follow").child(currentUserId.toString())
+            .child("Following")
+            .child(currentUserId.toString())
+            .setValue(true)
 
         userRef.child(currentUserId).setValue(userMap)
             .addOnCompleteListener { task ->

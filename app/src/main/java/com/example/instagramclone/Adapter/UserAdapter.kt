@@ -9,10 +9,11 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.FragmentActivity
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.instagramclone.Fragments.ProfileFragment
-import com.example.instagramclone.Model.User
+import com.example.instagramclone.model.User
 import com.example.instagramclone.R
 import com.example.instagramclone.utillity.Util
 import com.google.firebase.auth.FirebaseAuth
@@ -50,7 +51,7 @@ class UserAdapter(private val context: Context,
 
         //onClick Listener for displayed profiles
         holder.itemView.setOnClickListener {view ->
-            goToProfileFragment(user)
+            goToProfileFragment(user, view)
 
         }
 
@@ -76,9 +77,9 @@ class UserAdapter(private val context: Context,
 
     fun checkFollowingStatus(uid:String, followingBtn: Button) {
         //get following reference
-        val followRef = firebaseUser?.uid.let { uid ->
+        val followRef = firebaseUser?.uid.let { id ->
             FirebaseDatabase.getInstance().reference
-                .child("Follow").child(uid.toString())
+                .child("Follow").child(id.toString())
                 .child("Following")
         }
 
@@ -111,14 +112,18 @@ class UserAdapter(private val context: Context,
     }
 
 
-    private fun goToProfileFragment(user: User){
+    private fun goToProfileFragment(user: User, view: View){
         val profileFragment = ProfileFragment()
 
         val bundle = Bundle()
         bundle.putParcelable("user", user)
         profileFragment.arguments = bundle
 
-        (context as FragmentActivity).supportFragmentManager
-            .beginTransaction().replace(R.id.fragment_container, profileFragment).commit()
+        if (user.uid == firebaseUser?.uid)
+            view.findNavController().navigate(R.id.profile)
+        else
+            view.findNavController().navigate(R.id.profile, bundle)
+
+
     }
 }
